@@ -97,3 +97,155 @@ These are preferable over dedicated keys for non-alpha characters
 as they allow for more efficient use of space on the keyboard.
 
 
+
+## Building the Layout
+
+### Structure
+
+The layout we are building is based around a 34 key layout such as the ferris sweep.
+On the primary layer, we will have 26 alpha characters, a dedicated OS key, a dedicated number key, 
+two layer keys (one for numbers and symbols, the other for misc stuff such as fn keys), 
+and 4 other keys for other common actions (tab, enter, backspace, and esc).
+
+Common symbols will live as combo keys on the primary layer and have a space on a dedicated symbol layer.
+QMK has a default combo key for esc:~/\` which we will use for the esc key, 
+that means we dont have to worry about placing ~/\` somewhere on the keyboard as a combo key.
+
+The 4 common action keys will all live on separate columns to reduce same-finger bigrams.
+This leaves us with 4 columns- each with 2 keys and 6 columns- each with 3 keys 
+to place the remaining 26 alpha characters.
+
+#### Key Placement
+
+I've placed the 4 common action keys in the middle two columns for both the left and right hand.
+This is because the index fingers are responsible for 6 keys each 
+compared to the 3 keys other fingers are responsible for.
+This gives us a layout that looks something like this 
+(`*` represents all keys currently reserved for non-alpha characters):
+
+```txt
++---+---+---+---+---+   +---+---+---+---+---+
+|   |   |   |   |   |   |   |   |   |   |   | 
++---+---+---+---+---+   +---+---+---+---+---+
+|   |   |   |   |   |   |   |   |   |   |   | 
++---+---+---+---+---+   +---+---+---+---+---+
+|   |   |   | * | * |   | * | * |   |   |   | 
++---+---+---+---+---+   +---+---+---+---+---+
+            | * | * |   | * | * |
+            +---+---+   +---+---+
+
+```
+
+##### Least-frequent Alpha Characters
+
+To further reduce the chance of same-finger bigrams, we will place the 6 least common, least frequent (in bi-grams)
+alpha characters in the columns with 3 keys.
+This gives us some breathing room to strategically place the remaining 20 alpha characters in the columns with 2 keys.
+
+To find the least frequent, least common alpha characters, we will loop through each character in the alphabet 
+and tally up its frequency for each bigram that it is a part of.
+The 6 characters with the lowest frequency will be placed in the columns with 3 keys.
+To achieve this, I used the following script:
+
+```python
+import csv
+
+# load bigram_count.csv form data folder
+# disregard the first row
+bigram_count = {}
+
+with open("../data/bigram_count.csv") as f:
+    reader = csv.reader(f)
+    next(reader)
+    for row in reader:
+        bigram_count[row[0]] = int(row[1])
+        
+alphas = "abcdefghijklmnopqrstuvwxyz"
+
+alpha_freq_in_bigrams = {}
+
+for alpha in alphas:
+    for pair in alphas:
+        
+        bigram_left = alpha + pair
+        bigram_right = pair + alpha
+        
+        if bigram_left in bigram_count:
+            freq = bigram_count[bigram_left]
+            
+            if alpha not in alpha_freq_in_bigrams:
+                alpha_freq_in_bigrams[alpha] = freq
+            else:
+                alpha_freq_in_bigrams[alpha] += freq
+            
+        elif bigram_right in bigram_count:
+            freq = bigram_count[bigram_right]
+            
+            if alpha not in alpha_freq_in_bigrams:
+                alpha_freq_in_bigrams[alpha] = freq
+            else:
+                alpha_freq_in_bigrams[alpha] += freq
+                
+
+# sort the dictionary by value in ascending order
+sorted_alpha_freq_in_bigrams = dict(sorted(alpha_freq_in_bigrams.items(), key=lambda item: item[1]))
+
+# dump into a csv file
+with open("../data/least_frequent_alpha.csv", mode="w", newline="") as file:
+    writer = csv.writer(file)
+    writer.writerow(["alpha", "frequency"])
+    for alpha, freq in sorted_alpha_freq_in_bigrams.items():
+        writer.writerow([alpha, freq])
+                
+```
+
+Running this, we got these results (truncated to 6, we dont need any more than that) :
+
+```csv
+alpha,  frequency
+z,	    219036766
+j,	    284698658
+k,	    304223680
+q,	    332261214
+w,	    594309082
+x,	    807949328
+```
+
+Placing these characters in the layout would give us a layout that looks like this. 
+I moved the less frequent characters towards weaker fingers (ring and pinky) to try and reduce their usage.
+(note, the `x` characters have been replaced with `*`):
+
+```txt
++---+---+---+---+---+   +---+---+---+---+---+
+|   |   |   |   |   |   |   |   |   |   |   | 
++---+---+---+---+---+   +---+---+---+---+---+
+|   |   |   |   |   |   |   |   |   |   |   | 
++---+---+---+---+---+   +---+---+---+---+---+
+| z | k | x | * | * |   | * | * | w | q | j | 
++---+---+---+---+---+   +---+---+---+---+---+
+            | * | * |   | * | * |
+            +---+---+   +---+---+
+
+```
+
+##### Placement of bi-grams in columns with 3 alpha keys
+
+Now that we have placed the least frequent alpha characters, we can move on to placing the remaining 20 alpha characters.
+For now, we'll just look at the 6 columns with 3 alpha keys.
+For each of these columns, we will loop through each bi-gram 
+and add the frequencies of every bigram of every combination of the 3 letters. 
+The bigram with the lowest frequency will be placed in the column 
+with the most frequent alpha character in the bigram placed on the home row. 
+
+
+
+
+
+
+
+
+
+To find the ideal key combinations for each column, we need to group up 3 letters that are rarely used together.
+This is because we want to avoid same-finger bigrams as much as possible.
+To do this, we will loop through each possible tri-bigram and calculate the score for each one.
+The score 
