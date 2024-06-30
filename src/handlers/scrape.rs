@@ -56,7 +56,7 @@ async fn flatten(repo: String) {
 }
 
 
-pub async fn clone_flatten() {
+pub async fn scrape() {
 
     // get list of urls from ./data/repos.txt
     let repos_raw = std::fs::read_to_string("./data/repos.txt").unwrap();
