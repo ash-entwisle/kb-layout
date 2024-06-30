@@ -54,7 +54,7 @@ for md_file in md_files:
     matches = re.findall(r'https:\/\/github\.com\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+' , text)
     for match in matches:
         repos.add(match)
-
+    
 # Write all repos to a file
 with open("../data/repos.txt", "w") as f:
     for repo in repos:
