@@ -25,6 +25,43 @@ as numbers will live on their own separate layer on the keyboard.
 This data was then split into two separate files, 
 one containing just the alpha characters and the other containing just the non-alpha characters.
 
+#### List of Repositories
+
+To get a list of repositories, I used the following script to scrape a list of md files 
+from the top 100's repo mentioned earlier (this list can be found [here](./data/repos.txt)).
+
+```python
+import requests
+import re
+
+# MD files to scrape
+md_files = [
+    # see file for full list...
+]
+
+# For each md file, scrape it and add all github repos to a set
+repos = set()
+
+for md_file in md_files:
+    response = requests.get(md_file)
+    # response is in raw text
+    text = response.text
+    
+    print(text)
+    
+    # find all github repo links https://github.com/username/repo
+    matches = re.findall(r'https:\/\/github\.com\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+' , text)
+    for match in matches:
+        repos.add(match)
+
+# Write all repos to a file
+with open("../data/repos.txt", "w") as f:
+    for repo in repos:
+        f.write(repo + "\n")
+        
+print(f"Scraped {len(repos)} repos")
+```
+
 ### Frequency Analysis
 
 #### Alpha Bigrams
