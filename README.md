@@ -239,3 +239,6 @@ d              | * | * |   | * | * |
                +---+---+   +---+---+
 
 ```
+
+> Alr... after analysing the layout, its not as efficient as I thought it would be, 
+> however i have learned how colemak and isrt optimise sfb's
