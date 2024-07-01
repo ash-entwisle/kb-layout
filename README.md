@@ -329,3 +329,20 @@ I have also adjusted the columns to move the less common homerow characters to t
             +---+---+   +---+---+
 
 ```
+
+##### Remaining Blanks
+
+Next, we will fill in the remaining blanks with the 6 most optimal characters from the remaining characters.
+To do this, for each character, for each existing bigram, we will calculate the frequency of all possible bigrams
+and choose the one with the lowest frequency.
+
+##### Homing columns
+
+TODO: finish this
+
+Now, we will place the lowest frequency bigrams above the `a` and `i` keys.
+To do that, we will look at all combinations of the remaining characters with the homerow characters. 
+So far, we only have these characters left: `bcdfghlmpuvy`.
+To find the best placements, we will use the following script:
+
+```python
