@@ -44,11 +44,27 @@ mine = [
     "jad"
 ]
 
+mine_v2 = [
+    "qaz",
+    "xcw",
+    "udy",
+    "ptm",
+    "jvb",
+    "",
+    "",
+    "kfg",
+    "loh",
+    "is",
+    "rn",
+    "e"
+]
+
 
 layouts = {
     "colemak": colemak,
     "isrt": isrt,
-    "mine": mine
+    "mine": mine,
+    "mine_v2": mine_v2
 }
 
 def main():
