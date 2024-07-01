@@ -213,13 +213,14 @@ x,	    807949328
 
 Placing these characters in the layout would give us a layout that looks like this. 
 I moved the less frequent characters towards weaker fingers (ring and pinky) to try and reduce their usage.
-(note, the `x` characters have been replaced with `*`):
+furthermore, I'll be leaving all characters marked `!` for last 
+as they will be used to fill in the gaps with lower frequency keys.
 
 ```txt
 +---+---+---+---+---+   +---+---+---+---+---+
-|   |   |   |   |   |   |   |   |   |   |   | 
+|   |   |   | ! | ! |   | ! | ! |   |   |   | 
 +---+---+---+---+---+   +---+---+---+---+---+
-|   |   |   |   |   |   |   |   |   |   |   | 
+|   |   |   |   | ! |   | ! |   |   |   |   | 
 +---+---+---+---+---+   +---+---+---+---+---+
 | z | k | x | * | * |   | * | * | w | q | j | 
 +---+---+---+---+---+   +---+---+---+---+---+
@@ -228,24 +229,103 @@ I moved the less frequent characters towards weaker fingers (ring and pinky) to 
 
 ```
 
-##### Placement of bi-grams in columns with 3 alpha keys
+##### Filling in home row
 
-Now that we have placed the least frequent alpha characters, we can move on to placing the remaining 20 alpha characters.
-For now, we'll just look at the 6 columns with 3 alpha keys.
-For each of these columns, we will loop through each bi-gram 
-and add the frequencies of every bigram of every combination of the 3 letters. 
-The bigram with the lowest frequency will be placed in the column 
-with the most frequent alpha character in the bigram placed on the home row. 
+Next, we will fill in the 8 blank spots on the home row with the most common alpha characters
+(these being; `etaisrno` in descending order of frequency).
+we will look at all combinations of the existing 6 characters on the keymap
+with theses 8 characters and find the combination with the lowest bigram frequency.
+This will be the next character to be placed on the home row.
+The ones with the highest bi-gram frequency will be placed in the columns closest to the middle of the keyboard.
+The script used to do this is as follows:
+
+```python
+import csv 
+
+seed_chars = "xqjkwz"
+hr_chars = "etaisrno"
+
+# load bigram_count.csv form data folder
+# disregard the first row
+bigram_count = {}
+
+with open("../data/bigram_count.csv") as f:
+    reader = csv.reader(f)
+    next(reader)
+    for row in reader:
+        bigram_count[row[0]] = int(row[1])
+        
+placements = {}
+
+for seed_char in seed_chars:
+    
+    best_freq = 0
+    best_char = ""
+    
+    for hr_char in hr_chars: 
+        
+        bigram_left = hr_char + seed_char
+        bigram_right = seed_char + hr_char
+        
+        if bigram_left in bigram_count:
+            freq = bigram_count[bigram_left]
+            
+            if freq < best_freq or best_freq == 0:
+                best_freq = freq
+                best_char = hr_char
+            
+        elif bigram_right in bigram_count:
+            freq = bigram_count[bigram_right]
+            
+            if freq < best_freq or best_freq == 0:
+                best_freq = freq
+                best_char = hr_char
+            
+        placements[seed_char + best_char] = best_freq
+    
+# sort the dictionary by value in ascending order
+sorted_best_placement = dict(sorted(placements.items(), key=lambda item: item[1]))
+best_placements = []
+
+for best_placement, freq in sorted_best_placement.items():
+    char1 = best_placement[0]
+    char2 = best_placement[1]
+    
+    if char1 in seed_chars and char2 in hr_chars:
+        best_placements.append(char1 + char2)
+        
+        seed_chars = seed_chars.replace(char1, "")
+        seed_chars = seed_chars.replace(char2, "")
+        
+        hr_chars = hr_chars.replace(char2, "")
+        hr_chars = hr_chars.replace(char1, "")
+    
+print(best_placements)
+
+# dump into a csv file
+with open("../data/best_placement.csv", mode="w", newline="") as file:
+    writer = csv.writer(file)
+    writer.writerow(["seed_char", "home_row_char", "frequency"])
+    for seed_char, freq in sorted_best_placement.items():
+        writer.writerow([seed_char[0], seed_char[1], freq])
+                
+                
+```
 
 
+From the script above, I've added in the most optimal placements for the home row characters.
+The two remaining characters were `a` and `i` which were placed in the middle columns.
+I have also adjusted the columns to move the less common homerow characters to the weaker fingers.
 
+```txt
++---+---+---+---+---+   +---+---+---+---+---+
+|   |   |   | ! | ! |   | ! | ! |   |   |   | 
++---+---+---+---+---+   +---+---+---+---+---+
+| r | s | e | a | ! |   | ! | i | t | n | o | 
++---+---+---+---+---+   +---+---+---+---+---+
+| z | x | k | * | * |   | * | * | w | j | q | 
++---+---+---+---+---+   +---+---+---+---+---+
+            | * | * |   | * | * |
+            +---+---+   +---+---+
 
-
-
-
-
-
-To find the ideal key combinations for each column, we need to group up 3 letters that are rarely used together.
-This is because we want to avoid same-finger bigrams as much as possible.
-To do this, we will loop through each possible tri-bigram and calculate the score for each one.
-The score 
+```
