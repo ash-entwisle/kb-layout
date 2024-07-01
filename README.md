@@ -124,225 +124,118 @@ This gives us a layout that looks something like this
 (`*` represents all keys currently reserved for non-alpha characters):
 
 ```txt
-+---+---+---+---+---+   +---+---+---+---+---+
-|   |   |   |   |   |   |   |   |   |   |   | 
-+---+---+---+---+---+   +---+---+---+---+---+
-|   |   |   |   |   |   |   |   |   |   |   | 
-+---+---+---+---+---+   +---+---+---+---+---+
-|   |   |   | * | * |   | * | * |   |   |   | 
-+---+---+---+---+---+   +---+---+---+---+---+
-            | * | * |   | * | * |
-            +---+---+   +---+---+
+     0   1   2   3   4       5   6   7   8   9   
+   +---+---+---+---+---+   +---+---+---+---+---+
+a  |   |   |   |   |   |   |   |   |   |   |   | 
+   +---+---+---+---+---+   +---+---+---+---+---+
+b  |   |   |   |   |   |   |   |   |   |   |   | 
+   +---+---+---+---+---+   +---+---+---+---+---+
+c  |   |   |   | * | * |   | * | * |   |   |   | 
+   +---+---+---+---+---+   +---+---+---+---+---+
+d              | * | * |   | * | * |
+               +---+---+   +---+---+
 
 ```
 
-##### Least-frequent Alpha Characters
+##### Row-C Characters
 
-To further reduce the chance of same-finger bigrams, we will place the 6 least common, least frequent (in bi-grams)
-alpha characters in the columns with 3 keys.
-This gives us some breathing room to strategically place the remaining 20 alpha characters in the columns with 2 keys.
-
-To find the least frequent, least common alpha characters, we will loop through each character in the alphabet 
-and tally up its frequency for each bigram that it is a part of.
-The 6 characters with the lowest frequency will be placed in the columns with 3 keys.
-To achieve this, I used the following script:
-
-```python
-import csv
-
-# load bigram_count.csv form data folder
-# disregard the first row
-bigram_count = {}
-
-with open("../data/bigram_count.csv") as f:
-    reader = csv.reader(f)
-    next(reader)
-    for row in reader:
-        bigram_count[row[0]] = int(row[1])
-        
-alphas = "abcdefghijklmnopqrstuvwxyz"
-
-alpha_freq_in_bigrams = {}
-
-for alpha in alphas:
-    for pair in alphas:
-        
-        bigram_left = alpha + pair
-        bigram_right = pair + alpha
-        
-        if bigram_left in bigram_count:
-            freq = bigram_count[bigram_left]
-            
-            if alpha not in alpha_freq_in_bigrams:
-                alpha_freq_in_bigrams[alpha] = freq
-            else:
-                alpha_freq_in_bigrams[alpha] += freq
-            
-        elif bigram_right in bigram_count:
-            freq = bigram_count[bigram_right]
-            
-            if alpha not in alpha_freq_in_bigrams:
-                alpha_freq_in_bigrams[alpha] = freq
-            else:
-                alpha_freq_in_bigrams[alpha] += freq
-                
-
-# sort the dictionary by value in ascending order
-sorted_alpha_freq_in_bigrams = dict(sorted(alpha_freq_in_bigrams.items(), key=lambda item: item[1]))
-
-# dump into a csv file
-with open("../data/least_frequent_alpha.csv", mode="w", newline="") as file:
-    writer = csv.writer(file)
-    writer.writerow(["alpha", "frequency"])
-    for alpha, freq in sorted_alpha_freq_in_bigrams.items():
-        writer.writerow([alpha, freq])
-                
-```
-
-Running this, we got these results (truncated to 6, we dont need any more than that) :
-
-```csv
-alpha,  frequency
-z,	    219036766
-j,	    284698658
-k,	    304223680
-q,	    332261214
-w,	    594309082
-x,	    807949328
-```
-
-Placing these characters in the layout would give us a layout that looks like this. 
-I moved the less frequent characters towards weaker fingers (ring and pinky) to try and reduce their usage.
-furthermore, I'll be leaving all characters marked `!` for last 
-as they will be used to fill in the gaps with lower frequency keys.
+To place the characters in row-c, I will find the characters that are used the least in bigrams. 
+This aims to reduce the frequency of same-finger bigrams as well as moving more common characters away from the bottom row.
+The 6 least-used characters in bigrams are; `zjkqwx`, Placing them on the keymap gives us something like this:
 
 ```txt
-+---+---+---+---+---+   +---+---+---+---+---+
-|   |   |   | ! | ! |   | ! | ! |   |   |   | 
-+---+---+---+---+---+   +---+---+---+---+---+
-|   |   |   |   | ! |   | ! |   |   |   |   | 
-+---+---+---+---+---+   +---+---+---+---+---+
-| z | k | x | * | * |   | * | * | w | q | j | 
-+---+---+---+---+---+   +---+---+---+---+---+
-            | * | * |   | * | * |
-            +---+---+   +---+---+
+     0   1   2   3   4       5   6   7   8   9   
+   +---+---+---+---+---+   +---+---+---+---+---+
+a  |   |   |   |   |   |   |   |   |   |   |   | 
+   +---+---+---+---+---+   +---+---+---+---+---+
+b  |   |   |   |   |   |   |   |   |   |   |   | 
+   +---+---+---+---+---+   +---+---+---+---+---+
+c  | z | k | x | * | * |   | * | * | w | j | q | 
+   +---+---+---+---+---+   +---+---+---+---+---+
+d              | * | * |   | * | * |
+               +---+---+   +---+---+
 
 ```
 
-##### Filling in home row
+##### Home row, col 3 and 6
 
-Next, we will fill in the 8 blank spots on the home row with the most common alpha characters
-(these being; `etaisrno` in descending order of frequency).
-we will look at all combinations of the existing 6 characters on the keymap
-with theses 8 characters and find the combination with the lowest bigram frequency.
-This will be the next character to be placed on the home row.
-The ones with the highest bi-gram frequency will be placed in the columns closest to the middle of the keyboard.
-The script used to do this is as follows:
-
-```python
-import csv 
-
-seed_chars = "xqjkwz"
-hr_chars = "etaisrno"
-
-# load bigram_count.csv form data folder
-# disregard the first row
-bigram_count = {}
-
-with open("../data/bigram_count.csv") as f:
-    reader = csv.reader(f)
-    next(reader)
-    for row in reader:
-        bigram_count[row[0]] = int(row[1])
-        
-placements = {}
-
-for seed_char in seed_chars:
-    
-    best_freq = 0
-    best_char = ""
-    
-    for hr_char in hr_chars: 
-        
-        bigram_left = hr_char + seed_char
-        bigram_right = seed_char + hr_char
-        
-        if bigram_left in bigram_count:
-            freq = bigram_count[bigram_left]
-            
-            if freq < best_freq or best_freq == 0:
-                best_freq = freq
-                best_char = hr_char
-            
-        elif bigram_right in bigram_count:
-            freq = bigram_count[bigram_right]
-            
-            if freq < best_freq or best_freq == 0:
-                best_freq = freq
-                best_char = hr_char
-            
-        placements[seed_char + best_char] = best_freq
-    
-# sort the dictionary by value in ascending order
-sorted_best_placement = dict(sorted(placements.items(), key=lambda item: item[1]))
-best_placements = []
-
-for best_placement, freq in sorted_best_placement.items():
-    char1 = best_placement[0]
-    char2 = best_placement[1]
-    
-    if char1 in seed_chars and char2 in hr_chars:
-        best_placements.append(char1 + char2)
-        
-        seed_chars = seed_chars.replace(char1, "")
-        seed_chars = seed_chars.replace(char2, "")
-        
-        hr_chars = hr_chars.replace(char2, "")
-        hr_chars = hr_chars.replace(char1, "")
-    
-print(best_placements)
-
-# dump into a csv file
-with open("../data/best_placement.csv", mode="w", newline="") as file:
-    writer = csv.writer(file)
-    writer.writerow(["seed_char", "home_row_char", "frequency"])
-    for seed_char, freq in sorted_best_placement.items():
-        writer.writerow([seed_char[0], seed_char[1], freq])
-                
-                
-```
-
-
-From the script above, I've added in the most optimal placements for the home row characters.
-The two remaining characters were `a` and `i` which were placed in the middle columns.
-I have also adjusted the columns to move the less common homerow characters to the weaker fingers.
+The home row tiles (excl col 4 and 6) should be populated with the most frequent characters, 
+these being; `etaisrno`. 
+To find the most optimal characters to place in columns 3 and 6, I need to find the characters
+with the lowest bigram frequency. 
+This is because the index fingers (responsible for rows 3-6) are responsible for more keys than the other fingers.
+the 2 characters out of the most frequenc characters with the lowest bigram frequency are `o` and `n`, 
+this gives us the following layout:
 
 ```txt
-+---+---+---+---+---+   +---+---+---+---+---+
-|   |   |   | ! | ! |   | ! | ! |   |   |   | 
-+---+---+---+---+---+   +---+---+---+---+---+
-| r | s | e | a | ! |   | ! | i | t | n | o | 
-+---+---+---+---+---+   +---+---+---+---+---+
-| z | x | k | * | * |   | * | * | w | j | q | 
-+---+---+---+---+---+   +---+---+---+---+---+
-            | * | * |   | * | * |
-            +---+---+   +---+---+
+     0   1   2   3   4       5   6   7   8   9   
+   +---+---+---+---+---+   +---+---+---+---+---+
+a  |   |   |   |   |   |   |   |   |   |   |   | 
+   +---+---+---+---+---+   +---+---+---+---+---+
+b  |   |   |   | o |   |   |   | n |   |   |   | 
+   +---+---+---+---+---+   +---+---+---+---+---+
+c  | z | k | x | * | * |   | * | * | w | j | q | 
+   +---+---+---+---+---+   +---+---+---+---+---+
+d              | * | * |   | * | * |
+               +---+---+   +---+---+
 
 ```
 
-##### Remaining Blanks
 
-Next, we will fill in the remaining blanks with the 6 most optimal characters from the remaining characters.
-To do this, for each character, for each existing bigram, we will calculate the frequency of all possible bigrams
-and choose the one with the lowest frequency.
 
-##### Homing columns
+##### Index-Finger Quadgrams
 
-TODO: finish this
+So far, we have used the keys; `zkxwjq`, we also have the following keys reserved for the home row; `etaisrno`.
+The quadgram must also inlude `o` and `n`. 
+After removing modifiers, the index fingers are responsible for 4 keys each.
+To find the optimal placement of the alpha characters on the primary layer,
+I will calculate a score for each quadgram of alpha characters 
+by combining the frequency of each possible bigram. 
+I then weighted the score for each quadgram agains the sum of each letter frequency
+to get a score for each quadgram.
+I then took the two highest scoring quadgrams for each index finger and placed them on the keyboard.
+This gave us the quadgrams `fhny` and `gouv`. 
 
-Now, we will place the lowest frequency bigrams above the `a` and `i` keys.
-To do that, we will look at all combinations of the remaining characters with the homerow characters. 
-So far, we only have these characters left: `bcdfghlmpuvy`.
-To find the best placements, we will use the following script:
+When placing these quadgrams, the most frequent character is placed under the index finger (homing character).
+From there, for each pair, I need to find the two most optimal bigrams, this is to reduce vertical movement.
+To do this, I just compared the possible bigrams of the homing character, 
+placed the highest closest to the middle of the keyboard, the lowest above the highest. 
+and the last one above the homing character.
 
-```python
+```txt
+     0   1   2   3   4       5   6   7   8   9   
+   +---+---+---+---+---+   +---+---+---+---+---+
+a  |   |   |   | f | h |   | u | g |   |   |   | 
+   +---+---+---+---+---+   +---+---+---+---+---+
+b  |   |   |   | n | y |   | v | o |   |   |   |
+   +---+---+---+---+---+   +---+---+---+---+---+
+c  | z | k | x | * | * |   | * | * | w | j | q | 
+   +---+---+---+---+---+   +---+---+---+---+---+
+d              | * | * |   | * | * |
+               +---+---+   +---+---+
+
+```
+
+##### Optimal Tripple Bi-grams
+
+to fill in the remaining columns, I need to find combinations of 3 characters that have the lowest bigram frequency.
+These will then be placed in the remaining columns.
+So far, ive consumed the following characters; `zkxwjqfhnygovu`.
+Now, I need to find the 3 characters with the lowest bigram frequency 
+while requiring they contain one of the characters from row c (`zkxwjq`). 
+I also added a check to make sure each tripple bigram contains at least one home-row character (`etaisr`).
+
+
+```txt
+     0   1   2   3   4       5   6   7   8   9   
+   +---+---+---+---+---+   +---+---+---+---+---+
+a  | m | l | b | f | h |   | u | g | c | p | d | 
+   +---+---+---+---+---+   +---+---+---+---+---+
+b  | s | r | t | n | y |   | v | o | e | i | a |
+   +---+---+---+---+---+   +---+---+---+---+---+
+c  | x | k | z | * | * |   | * | * | q | w | j | 
+   +---+---+---+---+---+   +---+---+---+---+---+
+d              | * | * |   | * | * |
+               +---+---+   +---+---+
+
+```
