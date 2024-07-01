@@ -75,17 +75,6 @@ This metric will be used to determine the placement of the alpha characters on t
 as well as what columns the characters should be placed in to avoid same-finger bigrams 
 as much as possible to improve typing speed.
 
-#### First Alpha Trigrams
-
-First-trigram analysis was performed on the alpha characters from the only-alpha dataset.
-This was used to determine the frequency of each first-trigram in the dataset.
-
-This metric will be used alongside the bigram analysis 
-to determine the placement of the alpha characters on the primary layer of the keyboard.
-It aims to increase the score of letters near the start of words to get them closer to the home row
-or closer to the middle of the keyboard. 
-
-
 #### Non-Alpha Characters
 
 Frequency analysis was performed on the non-alpha characters from the non-alpha dataset. 
@@ -117,128 +106,22 @@ to place the remaining 26 alpha characters.
 
 #### Key Placement
 
-I've placed the 4 common action keys in the middle two columns for both the left and right hand.
-This is because the index fingers are responsible for 6 keys each 
-compared to the 3 keys other fingers are responsible for.
+After taking inspiration from keymaps such as isrt and colemak, 
+I've placed the 4 common action keys towards the right of the keyboard in the three last columns 
+with column 9 having two common aciton keys. 
 This gives us a layout that looks something like this 
 (`*` represents all keys currently reserved for non-alpha characters):
 
 ```txt
      0   1   2   3   4       5   6   7   8   9   
    +---+---+---+---+---+   +---+---+---+---+---+
-a  |   |   |   |   |   |   |   |   |   |   |   | 
+a  |   |   |   |   |   |   |   |   |   |   | * | 
    +---+---+---+---+---+   +---+---+---+---+---+
 b  |   |   |   |   |   |   |   |   |   |   |   | 
    +---+---+---+---+---+   +---+---+---+---+---+
-c  |   |   |   | * | * |   | * | * |   |   |   | 
+c  |   |   |   |   |   |   |   |   | * | * | * | 
    +---+---+---+---+---+   +---+---+---+---+---+
 d              | * | * |   | * | * |
                +---+---+   +---+---+
 
 ```
-
-##### Row-C Characters
-
-To place the characters in row-c, I will find the characters that are used the least in bigrams. 
-This aims to reduce the frequency of same-finger bigrams as well as moving more common characters away from the bottom row.
-The 6 least-used characters in bigrams are; `zjkqwx`, Placing them on the keymap gives us something like this:
-
-```txt
-     0   1   2   3   4       5   6   7   8   9   
-   +---+---+---+---+---+   +---+---+---+---+---+
-a  |   |   |   |   |   |   |   |   |   |   |   | 
-   +---+---+---+---+---+   +---+---+---+---+---+
-b  |   |   |   |   |   |   |   |   |   |   |   | 
-   +---+---+---+---+---+   +---+---+---+---+---+
-c  | z | k | x | * | * |   | * | * | w | j | q | 
-   +---+---+---+---+---+   +---+---+---+---+---+
-d              | * | * |   | * | * |
-               +---+---+   +---+---+
-
-```
-
-##### Home row, col 3 and 6
-
-The home row tiles (excl col 4 and 6) should be populated with the most frequent characters, 
-these being; `etaisrno`. 
-To find the most optimal characters to place in columns 3 and 6, I need to find the characters
-with the lowest bigram frequency. 
-This is because the index fingers (responsible for rows 3-6) are responsible for more keys than the other fingers.
-the 2 characters out of the most frequenc characters with the lowest bigram frequency are `o` and `n`, 
-this gives us the following layout:
-
-```txt
-     0   1   2   3   4       5   6   7   8   9   
-   +---+---+---+---+---+   +---+---+---+---+---+
-a  |   |   |   |   |   |   |   |   |   |   |   | 
-   +---+---+---+---+---+   +---+---+---+---+---+
-b  |   |   |   | o |   |   |   | n |   |   |   | 
-   +---+---+---+---+---+   +---+---+---+---+---+
-c  | z | k | x | * | * |   | * | * | w | j | q | 
-   +---+---+---+---+---+   +---+---+---+---+---+
-d              | * | * |   | * | * |
-               +---+---+   +---+---+
-
-```
-
-
-
-##### Index-Finger Quadgrams
-
-So far, we have used the keys; `zkxwjq`, we also have the following keys reserved for the home row; `etaisrno`.
-The quadgram must also inlude `o` and `n`. 
-After removing modifiers, the index fingers are responsible for 4 keys each.
-To find the optimal placement of the alpha characters on the primary layer,
-I will calculate a score for each quadgram of alpha characters 
-by combining the frequency of each possible bigram. 
-I then weighted the score for each quadgram agains the sum of each letter frequency
-to get a score for each quadgram.
-I then took the two highest scoring quadgrams for each index finger and placed them on the keyboard.
-This gave us the quadgrams `fhny` and `gouv`. 
-
-When placing these quadgrams, the most frequent character is placed under the index finger (homing character).
-From there, for each pair, I need to find the two most optimal bigrams, this is to reduce vertical movement.
-To do this, I just compared the possible bigrams of the homing character, 
-placed the highest closest to the middle of the keyboard, the lowest above the highest. 
-and the last one above the homing character.
-
-```txt
-     0   1   2   3   4       5   6   7   8   9   
-   +---+---+---+---+---+   +---+---+---+---+---+
-a  |   |   |   | f | h |   | u | g |   |   |   | 
-   +---+---+---+---+---+   +---+---+---+---+---+
-b  |   |   |   | n | y |   | v | o |   |   |   |
-   +---+---+---+---+---+   +---+---+---+---+---+
-c  | z | k | x | * | * |   | * | * | w | j | q | 
-   +---+---+---+---+---+   +---+---+---+---+---+
-d              | * | * |   | * | * |
-               +---+---+   +---+---+
-
-```
-
-##### Optimal Tripple Bi-grams
-
-to fill in the remaining columns, I need to find combinations of 3 characters that have the lowest bigram frequency.
-These will then be placed in the remaining columns.
-So far, ive consumed the following characters; `zkxwjqfhnygovu`.
-Now, I need to find the 3 characters with the lowest bigram frequency 
-while requiring they contain one of the characters from row c (`zkxwjq`). 
-I also added a check to make sure each tripple bigram contains at least one home-row character (`etaisr`).
-
-
-```txt
-     0   1   2   3   4       5   6   7   8   9   
-   +---+---+---+---+---+   +---+---+---+---+---+
-a  | m | l | b | f | h |   | u | g | c | p | d | 
-   +---+---+---+---+---+   +---+---+---+---+---+
-b  | s | r | t | n | y |   | v | o | e | i | a |
-   +---+---+---+---+---+   +---+---+---+---+---+
-c  | x | k | z | * | * |   | * | * | q | w | j | 
-   +---+---+---+---+---+   +---+---+---+---+---+
-d              | * | * |   | * | * |
-               +---+---+   +---+---+
-
-```
-
-> Alr... after analysing the layout, its not as efficient as I thought it would be, 
-> however i have learned how colemak and isrt optimise sfb's
