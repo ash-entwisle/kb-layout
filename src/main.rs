@@ -18,15 +18,22 @@ async fn main() {
             Command::new("analyze")
                 .about("Analyze data")
         )
+        .subcommand(
+            Command::new("layout_5")
+                .about("Layout 5")
+        )
         .get_matches();
 
     
     match matches.subcommand() {
         Some(("scrape", scrape_matches)) => {
             handlers::scrape::scrape().await;
-            }
+        }
         Some(("analyze", analyze_matches)) => {
             handlers::analyze::analyze().await;
+        }
+        Some(("layout_5", layout_5_matches)) => {
+            handlers::layout_5::layout_5().await;
         }
         _ => {
             println!("No subcommand specified, see the readme for usage instructions")
