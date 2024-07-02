@@ -3,66 +3,19 @@ import csv
 from itertools import permutations
 
 
-colemak = [
-    "zaq",
-    "xrw",
-    "csf",
-    "dtpvgb",
-    "",
-    "",
-    "kmjhnl",
-    "eu",
-    "iy",
-    "o"
-]
+colemak = ["zaq", "xrw", "csf", "dtpvgb", "", "", "kmjhnl", "eu", "iy", "o"]
+isrt = ["qiy", "vsc", "wrl", "dtmjgk", "", "", "bpzhnf", "eu", "a", "ox"]
+isrt_mod = []
+qwerty = ["qaz", "wsx", "edc", "rfvtgb", "", "", "yhnujm", "ik", "ol", "p"]
 
-isrt = [
-    "qiy",
-    "vsc",
-    "wrl",
-    "dtm",
-    "jgk",
-    "",
-    "",
-    "bpz",
-    "hnf",
-    "eu",
-    "a",
-    "ox"
-]
-
-mine = [
-    "xsm",
-    "krl",
-    "ztb",
-    "nfyh",
-    "",
-    "",
-    "vuog",
-    "qec",
-    "wip",
-    "jad"
-]
-
-mine_v2 = [
-    "qaz",
-    "xcw",
-    "udy",
-    "ptm",
-    "jvb",
-    "",
-    "",
-    "kfg",
-    "loh",
-    "is",
-    "rn",
-    "e"
-]
+mine = ["xsm", "krl", "ztb", "nfyh", "", "", "vuog", "qec", "wip", "jad"]
+mine_v2 = ["qaz", "xcw", "udy", "ptmjvb", "", "", "kfgloh", "is", "rn", "e"]
 
 
 layouts = {
     "colemak": colemak,
     "isrt": isrt,
+    "qwerty": qwerty,
     "mine": mine,
     "mine_v2": mine_v2
 }
@@ -104,11 +57,9 @@ def main():
             print(f"- Finger {i + 1}: {round(score, 2)}")
             total += score
         
+        print(f"%SFB: {round(total, 2)}")
         print()
-        print(f"SFB/finger: {round(total, 2)}")
-        
-        
+
+
 if __name__ == "__main__":
     main()       
-        
-            
