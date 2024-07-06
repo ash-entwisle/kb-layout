@@ -142,7 +142,7 @@ async fn handle_part(
 
 pub async fn layout_5(){
     let home_row_chars: Vec<char> = "etaisrno".chars().collect();
-    let best_score = 2 as f64;
+    let best_score = 1.75 as f64;
     let min_cap = 0.75;
 
     // let n3_bigram_score = read_csv("../data/n-bigram/n3_bigram_score.csv")?;

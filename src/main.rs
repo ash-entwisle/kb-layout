@@ -4,7 +4,7 @@ mod handlers;
 mod data;
 mod filter;
 
-#[tokio::main]
+#[tokio::main(flavor = "multi_thread")]
 async fn main() {
     let matches = Command::new("My CLI Tool")
         .version("1.0")
@@ -18,6 +18,12 @@ async fn main() {
             Command::new("analyze")
                 .about("Analyze data")
         )
+
+        .subcommand(
+            Command::new("pregen")
+                .about("pregen")
+        )
+
         .subcommand(
             Command::new("layout_5")
                 .about("Layout 5")
@@ -31,6 +37,9 @@ async fn main() {
         }
         Some(("analyze", analyze_matches)) => {
             handlers::analyze::analyze().await;
+        }
+        Some(("pregen", pregen_matches)) => {
+            handlers::pregen::pregen().await;
         }
         Some(("layout_5", layout_5_matches)) => {
             handlers::layout_5::layout_5().await;
